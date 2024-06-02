@@ -20,15 +20,35 @@ const client = new MongoClient(uri, {
   }
 });
 
+const userCollection = client.db('metroHomes').collection('users')
 const propertyCollection = client.db('metroHomes').collection('properties')
+
+
+// user related APIs
+
+app.get('/users', async(req,res)=>{
+  const result = await userCollection.find().toArray()
+  res.send(result)
+})
+
+app.post('/users', async(req, res)=>{
+  const user = req.body;
+  const query = {email: user.email};
+  const existingUser = await userCollection.findOne(query)
+  if(existingUser){
+    return res.send({message: 'User Already Exists', insertedId: null})
+  }
+  const result = await userCollection.insertOne(user)
+  res.send(result)
+})
 
 // property related apis
 app.get('/properties', async (req, res) => {
-  const search = req.query.search;
-  // let query = {
-  //   location: { $regex: search, $options: 'i' }
-  // }
-  const result = await propertyCollection.find().toArray()
+  const search = req.query.search || '';
+  let query = {
+    location: { $regex: search, $options: 'i' }
+  }
+  const result = await propertyCollection.find(query).toArray()
   res.send(result)
 })
 
