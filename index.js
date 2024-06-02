@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 8000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 // middleware
 app.use(cors())
@@ -22,12 +22,20 @@ const client = new MongoClient(uri, {
 
 const propertyCollection = client.db('metroHomes').collection('properties')
 
+// property related apis
 app.get('/properties', async (req, res) => {
   const search = req.query.search;
-  let query = {
-    location: { $regex: search, $options: 'i' }
-  }
-  const result = await propertyCollection.find(query).toArray()
+  // let query = {
+  //   location: { $regex: search, $options: 'i' }
+  // }
+  const result = await propertyCollection.find().toArray()
+  res.send(result)
+})
+
+app.get('/property/:id', async(req, res)=>{
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)}
+  const result = await propertyCollection.findOne(query)
   res.send(result)
 })
 
