@@ -20,6 +20,24 @@ const client = new MongoClient(uri, {
   }
 });
 
+const propertyCollection = client.db('metroHomes').collection('properties')
+
+app.get('/properties', async (req, res) => {
+  const search = req.query.search;
+  let query = {
+    location: { $regex: search, $options: 'i' }
+  }
+  const result = await propertyCollection.find(query).toArray()
+  res.send(result)
+})
+
+
+app.post('/property', async (req, res) => {
+  const propertyData = req.body;
+  const result = await propertyCollection.insertOne(propertyData)
+  res.send(result)
+})
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -35,10 +53,10 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get('/', async(req, res)=>{
-    res.send('Metro Homes is running ')
+app.get('/', async (req, res) => {
+  res.send('Metro Homes is running ')
 })
 
-app.listen(port, ()=>{
-    console.log(`Metro home server is running on port ${port}`)
+app.listen(port, () => {
+  console.log(`Metro home server is running on port ${port}`)
 })
