@@ -1,9 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const port = process.env.PORT || 8000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
+
+const port = process.env.PORT || 8000;
+
 // middleware
 app.use(cors())
 app.use(express.json())
@@ -22,6 +25,10 @@ const client = new MongoClient(uri, {
 
 const userCollection = client.db('metroHomes').collection('users')
 const propertyCollection = client.db('metroHomes').collection('properties')
+
+
+// jwt related api
+
 
 
 // user related APIs
@@ -56,6 +63,14 @@ app.get('/property/:id', async(req, res)=>{
   const id = req.params.id;
   const query = {_id: new ObjectId(id)}
   const result = await propertyCollection.findOne(query)
+  res.send(result)
+})
+
+app.get('/myAddedProperties/:email', async(req, res)=>{
+  const email = req.params.email;
+  console.log(email)
+  const query = {'agent.email':email}
+  const result = await propertyCollection.find(query).toArray()
   res.send(result)
 })
 
