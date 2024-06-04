@@ -172,6 +172,19 @@ app.delete('/property/:id', async (req, res) => {
   res.send(result)
 })
 
+app.patch('/property/status/:id', async(req, res)=>{
+  const id = req.params.id;
+  const status = req.body.status;
+  const query = { _id: new ObjectId(id)}
+  const updateDoc = {
+    $set: { status : status }
+  }
+  const result = await propertyCollection.updateOne(query, updateDoc)
+  res.send(result)
+})
+
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
