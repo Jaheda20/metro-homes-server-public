@@ -113,12 +113,19 @@ app.delete('/deleteUser/:email', async (req, res) => {
 })
 
 
-
 // property related apis
+
+app.get('/allProperties', async(req, res)=>{
+  const result = await propertyCollection.find().toArray()
+  res.send(result)
+})
+
 app.get('/properties', async (req, res) => {
   const search = req.query.search || '';
+  const status = req.body.status
   let query = {
-    location: { $regex: search, $options: 'i' }
+    location: { $regex: search, $options: 'i' },
+    status: 'Verified'
   }
   const result = await propertyCollection.find(query).toArray()
   res.send(result)
@@ -146,20 +153,16 @@ app.post('/property', async (req, res) => {
   res.send(result)
 })
 
-app.put('/updateProperty/:id', async (req, res) => {
+app.put('/property/update/:id', async (req, res) => {
   const id = req.params.id
   const query = { _id: new ObjectId(id) }
-  const options = { upsert: true };
-  const updatedPropertyData = req.body;
-  console.log(updatedPropertyData)
+  const propertyData = req.body;
+  console.log(propertyData)
+  const options = {upsert: true}
   const updateProperty = {
-    $set: {
-      image: updatedPropertyData.image,
-      location: updatedPropertyData.location,
-      title: updatedPropertyData.title,
-      min_price: updatedPropertyData.min_price,
-      max_price: updatedPropertyData.max_price
-    }
+    $set: 
+     { ...propertyData}
+    
   }
   const result = await propertyCollection.updateOne(query, updateProperty, options)
   res.send(result)
