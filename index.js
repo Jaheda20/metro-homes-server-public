@@ -189,6 +189,19 @@ app.patch('/property/status/:id', async(req, res)=>{
 
 // review related apis
 
+app.get('/reviews', async(req, res)=>{
+  const result = await reviewCollection.find().toArray()
+  res.send(result)
+})
+
+app.get('/myReviews/:email', async(req, res)=>{
+  const email = req.params.email;
+  console.log(email)
+  const query = { 'authorEmail': email }
+  const result = await reviewCollection.find(query).toArray()
+  res.send(result)
+})
+
 app.post('/reviews', async(req, res)=>{
   const reviewData = req.body;
   const result = await reviewCollection.insertOne(reviewData)
