@@ -41,6 +41,7 @@ const client = new MongoClient(uri, {
 
 const userCollection = client.db('metroHomes').collection('users')
 const propertyCollection = client.db('metroHomes').collection('properties')
+const reviewCollection = client.db('metroHomes').collection('reviews')
 
 
 // jwt related api
@@ -183,6 +184,14 @@ app.patch('/property/status/:id', async(req, res)=>{
     $set: { status : status }
   }
   const result = await propertyCollection.updateOne(query, updateDoc)
+  res.send(result)
+})
+
+// review related apis
+
+app.post('/reviews', async(req, res)=>{
+  const reviewData = req.body;
+  const result = await reviewCollection.insertOne(reviewData)
   res.send(result)
 })
 
