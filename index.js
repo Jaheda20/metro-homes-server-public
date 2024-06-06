@@ -202,11 +202,28 @@ app.get('/myReviews/:email', async(req, res)=>{
   res.send(result)
 })
 
+app.get('/reviews/:propertyId', async(req, res)=>{
+  const propertyId = req.params.propertyId;
+  
+  const query = { 'propertyId': propertyId }
+  const result = await reviewCollection.find(query).toArray()
+  res.send(result)
+})
+
 app.post('/reviews', async(req, res)=>{
   const reviewData = req.body;
   const result = await reviewCollection.insertOne(reviewData)
   res.send(result)
 })
+
+app.delete('/review/:id', async(req, res)=>{
+  const id = req.params.id;
+  console.log(id)
+  const query = { _id: new ObjectId(id) }
+  const result = await reviewCollection.deleteOne(query)
+  res.send(result)
+})
+
 
 
 
