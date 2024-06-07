@@ -42,6 +42,7 @@ const client = new MongoClient(uri, {
 const userCollection = client.db('metroHomes').collection('users')
 const propertyCollection = client.db('metroHomes').collection('properties')
 const reviewCollection = client.db('metroHomes').collection('reviews')
+const wishlistCollection = client.db('metroHomes').collection('wishlists')
 
 
 // jwt related api
@@ -123,14 +124,23 @@ app.get('/allProperties', async(req, res)=>{
 
 app.get('/properties', async (req, res) => {
   const search = req.query.search || '';
-  const status = req.body.status
+  const status = req.query.status;
+  const sort = req.query.sort;
   let query = {
     location: { $regex: search, $options: 'i' },
     status: 'Verified'
   }
-  const result = await propertyCollection.find(query).toArray()
+  let options ={}
+  if (sort)
+    options = {sort: {min_price: sort === 'asc' ? 1 : -1}}
+  // if (sort){
+  //   options.sort = {min_price: sort === 'asc' ? 1 : -1}
+  // }
+
+  const result = await propertyCollection.find(query, options).toArray()
   res.send(result)
 })
+
 
 app.get('/property/:id', async (req, res) => {
   const id = req.params.id;
@@ -223,6 +233,37 @@ app.delete('/review/:id', async(req, res)=>{
   const result = await reviewCollection.deleteOne(query)
   res.send(result)
 })
+
+// wishlist related api
+
+app.get('/wishlists', async(req, res)=>{
+  const result = await wishlistCollection.find().toArray()
+  res.send(result)
+})
+
+app.post('/wishlists/:email', async(req, res)=>{
+  const wishlistData = req.body;
+  const email= req.params.email;
+  const propertyId = wishlistData.propertyId;
+
+  console.log('wishlist data', wishlistData)
+  console.log(email, propertyId)
+
+  const query ={
+    email: email, 
+    propertyId: propertyId
+  }
+  console.log(query)
+  const alreadyAdded = await wishlistCollection.findOne(query)
+  if(alreadyAdded){
+    return res.status(400).send('You have already added')
+  }
+  const result = await wishlistCollection.insertOne(wishlistData)
+  res.send(result)
+})
+
+
+
 
 
 
