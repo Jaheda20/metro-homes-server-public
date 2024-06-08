@@ -291,7 +291,6 @@ app.get('/sentOffers/:agentEmail', async(req, res)=>{
 
 app.post('/offers', async(req, res)=>{
   const offerData = req.body;
-
   const query = {
     email: offerData.email,
     propertyId: offerData.propertyId
@@ -307,6 +306,18 @@ app.post('/offers', async(req, res)=>{
   }
 
   const result = await offerCollection.insertOne(offerData)
+  res.send(result)
+})
+
+
+app.patch('/offers/status/:id', async(req, res)=>{
+  const id = req.params.id;
+  const status = req.body.status;
+  const query = { _id: new ObjectId(id)}
+  const updateDoc = {
+    $set: { status : status }
+  }
+  const result = await offerCollection.updateOne(query, updateDoc)
   res.send(result)
 })
 
