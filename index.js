@@ -1,11 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
+require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken')
-require('dotenv').config()
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 const port = process.env.PORT || 8000;
+
 
 // middleware
 app.use(cors())
@@ -44,6 +46,7 @@ const propertyCollection = client.db('metroHomes').collection('properties')
 const reviewCollection = client.db('metroHomes').collection('reviews')
 const wishlistCollection = client.db('metroHomes').collection('wishlists')
 const offerCollection = client.db('metroHomes').collection('offers')
+const paymentCollection = client.db('metroHomes').collection('payments')
 
 
 
@@ -318,6 +321,49 @@ app.patch('/offers/status/:id', async(req, res)=>{
     $set: { status : status }
   }
   const result = await offerCollection.updateOne(query, updateDoc)
+  res.send(result)
+})
+
+
+// payment intent
+
+
+
+app.post('/create-payment-intent', verifyToken, async(req, res)=>{
+  const { price } = req.body;
+  const priceInCent = parseInt(price * 100);
+  console.log(priceInCent, 'amount inside the intent')
+  
+  if(!price || priceInCent < 1) return
+
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: priceInCent,
+    currency: "usd",
+    payment_method_types: ['card']
+  })
+  res.send({
+    clientSecret: paymentIntent.client_secret
+  })
+})
+
+
+app.get('/payments', async(req, res)=>{
+  const result = await paymentCollection.find().toArray()
+  res.send(result)
+})
+
+app.get('/payment/:email', async(req, res)=>{
+  const email = req.params.email;
+  const query = {email: email}
+  const result = await paymentCollection.find(query).toArray()
+  res.send(result)
+})
+
+
+// save payments
+app.post('/payments', async(req, res)=>{
+  const paymentsData = req.body;
+  const result = await paymentCollection.insertOne(paymentsData)
   res.send(result)
 })
 
