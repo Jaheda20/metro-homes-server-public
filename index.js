@@ -359,6 +359,13 @@ app.get('/payment/:email', async(req, res)=>{
   res.send(result)
 })
 
+app.get('/soldProperties/:agentEmail', async(req, res)=>{
+  const email = req.params.agentEmail;
+  console.log(email)
+  const query= {agentEmail: email}
+  const result = await paymentCollection.find(query).toArray()
+  res.send(result)
+})
 
 // save payments
 app.post('/payments', async(req, res)=>{
