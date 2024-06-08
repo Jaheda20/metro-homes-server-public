@@ -281,6 +281,14 @@ app.get('/offers/:email', async(req, res)=>{
   res.send(result)
 })
 
+app.get('/sentOffers/:agentEmail', async(req, res)=>{
+  const email = req.params.agentEmail;
+  console.log(email)
+  const query= {agentEmail: email}
+  const result = await offerCollection.find(query).toArray()
+  res.send(result)
+})
+
 app.post('/offers', async(req, res)=>{
   const offerData = req.body;
 
