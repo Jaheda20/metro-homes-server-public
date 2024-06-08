@@ -43,6 +43,8 @@ const userCollection = client.db('metroHomes').collection('users')
 const propertyCollection = client.db('metroHomes').collection('properties')
 const reviewCollection = client.db('metroHomes').collection('reviews')
 const wishlistCollection = client.db('metroHomes').collection('wishlists')
+const offerCollection = client.db('metroHomes').collection('offers')
+
 
 
 // jwt related api
@@ -236,8 +238,10 @@ app.delete('/review/:id', async(req, res)=>{
 
 // wishlist related api
 
-app.get('/wishlists', async(req, res)=>{
-  const result = await wishlistCollection.find().toArray()
+app.get('/wishlists/:email', async(req, res)=>{
+  const email = req.params.email;
+  const query = {email: email}
+  const result = await wishlistCollection.find(query).toArray()
   res.send(result)
 })
 
@@ -259,6 +263,30 @@ app.post('/wishlists/:email', async(req, res)=>{
     return res.status(400).send('You have already added')
   }
   const result = await wishlistCollection.insertOne(wishlistData)
+  res.send(result)
+})
+
+
+// offer related api
+
+app.post('/offers', async(req, res)=>{
+  const offerData = req.body;
+
+  const query = {
+    email: offerData.email,
+    propertyId: offerData.propertyId
+  }
+
+  const alreadyOffered = await offerCollection.findOne(query)
+  if(alreadyOffered){
+    return res.status(400).send({message: "You have already made an offer for this property"})
+  }
+
+  if(offerData.amount < offerData.min_price || offerData.amount > offerData.max_price){
+    return res.status(400).send({message: "Offered amount must be within the price range"})
+  }
+
+  const result = await offerCollection.insertOne(offerData)
   res.send(result)
 })
 
