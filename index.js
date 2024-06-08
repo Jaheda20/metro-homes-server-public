@@ -269,6 +269,18 @@ app.post('/wishlists/:email', async(req, res)=>{
 
 // offer related api
 
+app.get('/offers', async(req, res)=>{
+  const result = await offerCollection.find().toArray()
+  res.send(result)
+})
+
+app.get('/offers/:email', async(req, res)=>{
+  const email = req.params.email;
+  const query = {email: email};
+  const result = await offerCollection.find(query).toArray()
+  res.send(result)
+})
+
 app.post('/offers', async(req, res)=>{
   const offerData = req.body;
 
