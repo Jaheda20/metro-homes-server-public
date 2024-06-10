@@ -245,7 +245,7 @@ app.patch('/property/status/:id', verifyToken, verifyAdmin, async (req, res) => 
 
 // review related apis
 
-app.get('/reviews', async (req, res) => {
+app.get('/reviews', verifyToken, verifyAdmin, async (req, res) => {
   const result = await reviewCollection.find().toArray()
   res.send(result)
 })
