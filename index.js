@@ -142,7 +142,7 @@ app.patch('/users/update/:email', async (req, res) => {
   res.send(result)
 })
 
-app.delete('/deleteUser/:email', verifyToken, verifyAdmin, async (req, res) => {
+app.delete('/deleteUser/:email', async (req, res) => {
   const email = req.params.email;
   const result = await userCollection.deleteOne({ email });
   res.send(result);
@@ -232,7 +232,7 @@ app.delete('/property/:id', async (req, res) => {
   res.send(result)
 })
 
-app.patch('/property/status/:id', verifyToken, verifyAdmin, async (req, res) => {
+app.patch('/property/status/:id', verifyToken, async (req, res) => {
   const id = req.params.id;
   const status = req.body.status;
   const query = { _id: new ObjectId(id) }
@@ -253,7 +253,6 @@ app.put('/property/advertise/:id', async(req, res) => {
   console.log('mongodb query', query)
   const propertyData = req.body;
   console.log('property data',propertyData)
-  // const options = { upsert: true }
   const updatedDoc = {
     $set: {
       ...propertyData,
@@ -276,11 +275,9 @@ app.get('/properties/advertised', async(req, res) => {
 
 
 
-
-
 // review related apis
 
-app.get('/reviews', verifyToken, verifyAdmin, async (req, res) => {
+app.get('/reviews', async (req, res) => {
   const result = await reviewCollection.find().toArray()
   res.send(result)
 })
@@ -402,7 +399,7 @@ app.patch('/offers/status/:id', async (req, res) => {
 
 // payment intent
 
-app.post('/create-payment-intent', verifyToken, async (req, res) => {
+app.post('/create-payment-intent', async (req, res) => {
   const { price } = req.body;
   const priceInCent = parseInt(price * 100);
   console.log(priceInCent, 'amount inside the intent')
@@ -425,14 +422,14 @@ app.get('/payments', async (req, res) => {
   res.send(result)
 })
 
-app.get('/payment/:email', verifyToken, async (req, res) => {
+app.get('/payment/:email', async (req, res) => {
   const email = req.params.email;
   const query = { email: email }
   const result = await paymentCollection.find(query).toArray()
   res.send(result)
 })
 
-app.get('/soldProperties/:agentEmail', async (req, res) => {
+app.get('/soldProperties/:agentEmail', verifyToken, verifyAgent, async (req, res) => {
   const email = req.params.agentEmail;
   console.log(email)
   const query = { agentEmail: email }
@@ -447,10 +444,6 @@ app.post('/payments', async (req, res) => {
   const result = await paymentCollection.insertOne(paymentsData)
   res.send(result)
 })
-
-
-
-
 
 
 
