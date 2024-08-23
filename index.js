@@ -243,6 +243,41 @@ app.patch('/property/status/:id', verifyToken, verifyAdmin, async (req, res) => 
   res.send(result)
 })
 
+app.put('/property/advertise/:id', async(req, res) => {
+  const id = req.params.id;
+  console.log('property id',id)
+  if(!ObjectId.isValid(id)) {
+    return res.status(400).send({message: "Invalid id format"})
+  }
+  const query = {_id: new ObjectId(id)}
+  console.log('mongodb query', query)
+  const propertyData = req.body;
+  console.log('property data',propertyData)
+  // const options = { upsert: true }
+  const updatedDoc = {
+    $set: {
+      ...propertyData,
+      isAdvertised: true,
+      advertisedAt: new Date(),
+    }
+  }
+  const options = { upsert: true }
+  const result = await propertyCollection.updateOne(query, updatedDoc, options)
+  res.send(result)
+})
+
+app.get('/properties/advertised', async(req, res) => {
+  let query = {
+    isAdvertised: true
+  }
+  const result = await propertyCollection.find(query).toArray()
+  res.send(result)
+})
+
+
+
+
+
 // review related apis
 
 app.get('/reviews', verifyToken, verifyAdmin, async (req, res) => {
